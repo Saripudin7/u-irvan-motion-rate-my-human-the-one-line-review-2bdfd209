@@ -20,11 +20,18 @@ OUTPUT_PATH = os.path.join(OUTPUT_DIR, "entry.txt")
 
 
 def main() -> None:
-    line = REVIEW
+    line = REVIEW.strip()
     # Gate: exactly one line, 1-200 characters, not only whitespace.
     assert "\n" not in line, "entry must be a single line"
     assert 1 <= len(line) <= 200, f"entry must be 1-200 chars, got {len(line)}"
     assert line.strip(), "entry must not be only whitespace"
+    # Gate: the review must open with a 5-star rating and an em-dash
+    # separator, so a truncated or reformatted line fails loudly.
+    stars, _, _ = line.partition(" ")
+    assert len(stars) == 5 and set(stars) <= {"\u2605", "\u2606"}, (
+        f"entry must open with a 5-star rating, got {stars!r}"
+    )
+    assert " \u2014 " in line, "entry must contain an em-dash separator"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
         f.write(line)
